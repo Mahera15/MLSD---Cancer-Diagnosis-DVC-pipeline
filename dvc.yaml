@@ -1,0 +1,61 @@
+stages:
+  prepare:
+    cmd: python src/prepare.py
+    deps:
+      - src/prepare.py
+      - data/raw/data.csv
+    params:
+      - prepare.test_size
+      - prepare.random_state
+    outs:
+      - data/processed/train.csv
+      - data/processed/test.csv
+
+  train_random_forest:
+    cmd: python src/train.py train random_forest
+    deps:
+      - src/train.py
+      - data/processed/train.csv
+    params:
+      - train_random_forest.n_estimators
+      - train_random_forest.max_depth
+      - train_random_forest.random_state
+    outs:
+      - models/model_random_forest.pkl
+
+  evaluate_random_forest:
+    cmd: python src/train.py evaluate random_forest
+    deps:
+      - src/train.py
+      - models/model_random_forest.pkl
+      - data/processed/test.csv
+    metrics:
+      - metrics/metrics_random_forest.json:
+          cache: false
+    outs:
+      - metrics/confusion_matrix_random_forest.png
+
+  train_logistic_regression:
+    cmd: python src/train.py train logistic_regression
+    deps:
+      - src/train.py
+      - data/processed/train.csv
+    params:
+      - train_logistic_regression.max_iter
+      - train_logistic_regression.random_state
+    outs:
+      - models/model_logistic_regression.pkl
+      - models/scaler_logistic_regression.pkl
+
+  evaluate_logistic_regression:
+    cmd: python src/train.py evaluate logistic_regression
+    deps:
+      - src/train.py
+      - models/model_logistic_regression.pkl
+      - models/scaler_logistic_regression.pkl
+      - data/processed/test.csv
+    metrics:
+      - metrics/metrics_logistic_regression.json:
+          cache: false
+    outs:
+      - metrics/confusion_matrix_logistic_regression.png

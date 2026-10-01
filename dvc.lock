@@ -1,0 +1,123 @@
+schema: '2.0'
+stages:
+  prepare:
+    cmd: python src/prepare.py
+    deps:
+    - path: data/raw/data.csv
+      hash: md5
+      md5: 6165d90b8708bb1c1dd14245cc6bef46
+      size: 125204
+    - path: src/prepare.py
+      hash: md5
+      md5: 38ecab59504ecfed761f2a47ac2b0d58
+      size: 1377
+    params:
+      params.yaml:
+        prepare.random_state: 42
+        prepare.test_size: 0.2
+    outs:
+    - path: data/processed/test.csv
+      hash: md5
+      md5: 6ce5619787ec2f031f3810d0b1627409
+      size: 24766
+    - path: data/processed/train.csv
+      hash: md5
+      md5: b88b606809e30b085be37f2ea17971cb
+      size: 97622
+  train_random_forest:
+    cmd: python src/train.py train random_forest
+    deps:
+    - path: data/processed/train.csv
+      hash: md5
+      md5: b88b606809e30b085be37f2ea17971cb
+      size: 97622
+    - path: src/train.py
+      hash: md5
+      md5: 9ab7608b007a684ceef53e1a6864f9e4
+      size: 3409
+    params:
+      params.yaml:
+        train_random_forest.max_depth: 6
+        train_random_forest.n_estimators: 100
+        train_random_forest.random_state: 42
+    outs:
+    - path: models/model_random_forest.pkl
+      hash: md5
+      md5: 72f36f1f2271a3b3f295809d6269b913
+      size: 302345
+  evaluate_random_forest:
+    cmd: python src/train.py evaluate random_forest
+    deps:
+    - path: data/processed/test.csv
+      hash: md5
+      md5: 6ce5619787ec2f031f3810d0b1627409
+      size: 24766
+    - path: models/model_random_forest.pkl
+      hash: md5
+      md5: 72f36f1f2271a3b3f295809d6269b913
+      size: 302345
+    - path: src/train.py
+      hash: md5
+      md5: 9ab7608b007a684ceef53e1a6864f9e4
+      size: 3409
+    outs:
+    - path: metrics/confusion_matrix_random_forest.png
+      hash: md5
+      md5: 58439051ed3db4f01f91f82baad62371
+      size: 18199
+    - path: metrics/metrics_random_forest.json
+      hash: md5
+      md5: 768769a6188c1f97356f202af1f9280a
+      size: 142
+  train_logistic_regression:
+    cmd: python src/train.py train logistic_regression
+    deps:
+    - path: data/processed/train.csv
+      hash: md5
+      md5: b88b606809e30b085be37f2ea17971cb
+      size: 97622
+    - path: src/train.py
+      hash: md5
+      md5: 9ab7608b007a684ceef53e1a6864f9e4
+      size: 3409
+    params:
+      params.yaml:
+        train_logistic_regression.max_iter: 1000
+        train_logistic_regression.random_state: 42
+    outs:
+    - path: models/model_logistic_regression.pkl
+      hash: md5
+      md5: 4ddd31091723b89a471631553f79a807
+      size: 1103
+    - path: models/scaler_logistic_regression.pkl
+      hash: md5
+      md5: 6d7f5278d1c1ce7a92513519a61e1fbb
+      size: 2071
+  evaluate_logistic_regression:
+    cmd: python src/train.py evaluate logistic_regression
+    deps:
+    - path: data/processed/test.csv
+      hash: md5
+      md5: 6ce5619787ec2f031f3810d0b1627409
+      size: 24766
+    - path: models/model_logistic_regression.pkl
+      hash: md5
+      md5: 4ddd31091723b89a471631553f79a807
+      size: 1103
+    - path: models/scaler_logistic_regression.pkl
+      hash: md5
+      md5: 6d7f5278d1c1ce7a92513519a61e1fbb
+      size: 2071
+    - path: src/train.py
+      hash: md5
+      md5: 9ab7608b007a684ceef53e1a6864f9e4
+      size: 3409
+    outs:
+    - path: metrics/confusion_matrix_logistic_regression.png
+      hash: md5
+      md5: 566295d0f3b1bf3cd6257e0e0e78148d
+      size: 18631
+    - path: metrics/metrics_logistic_regression.json
+      hash: md5
+      md5: 74d59f43faac15cf136fe485fd2e4591
+      size: 142
